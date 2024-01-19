@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_chat_bubble/chat_bubble.dart';
 import 'package:fluttergem_showcase/controller/home_controller.dart';
+import 'package:fluttergem_showcase/utils/widget/chat_widget.dart';
 
 class HomeScreens extends StatefulWidget {
   const HomeScreens({super.key});
@@ -22,94 +22,115 @@ class _HomeScreensState extends State<HomeScreens> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Gemini'),
+        leading: const Padding(
+          padding: EdgeInsets.only(left: 10.0),
+          child: CircleAvatar(
+            radius: 23,
+            backgroundImage: NetworkImage(
+              "https://awsimages.detik.net.id/community/media/visual/2023/06/26/ilustrasi-robot_169.jpeg?w=1200",
+            ),
+          ),
+        ),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('AI Chatbot '),
+            Text(
+              _controller!.isLoading ? "sedang mengetik...." : "Online",
+              style: const TextStyle(
+                color: Colors.grey,
+                fontSize: 12.0,
+              ),
+            ),
+          ],
+        ),
       ),
       body: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.only(left: 5, right: 5),
         child: Column(
           children: [
-            ChatBubble(
-              clipper: ChatBubbleClipper3(type: BubbleType.sendBubble),
-              alignment: Alignment.topRight,
-              margin: const EdgeInsets.only(top: 20),
-              backGroundColor: Colors.blue,
-              child: Container(
-                constraints: BoxConstraints(
-                  maxWidth: MediaQuery.of(context).size.width * 0.7,
-                ),
-                child: const Text(
-                  "assalamualaikum",
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ),
-            ChatBubble(
-              clipper: ChatBubbleClipper3(type: BubbleType.receiverBubble),
-              backGroundColor: const Color(0xffE7E7ED),
-              margin: const EdgeInsets.only(top: 20),
-              child: Container(
-                constraints: BoxConstraints(
-                  maxWidth: MediaQuery.of(context).size.width * 0.7,
-                ),
-                child: const Text(
-                  "wallaikumsallam wr wb.",
-                  style: TextStyle(color: Colors.black),
+            Expanded(
+              child: SingleChildScrollView(
+                reverse: true,
+                controller: ScrollController(),
+                child: Column(
+                  children: [
+                    if (_controller != null)
+                      ..._controller!.chatList.map((msg) {
+                        return ChatWidget.textMsg(
+                          context: context,
+                          message: msg.message,
+                          id: msg.id.toString(),
+                          messageTime: msg.time.toString(),
+                          isSender: msg.isSender,
+                        );
+                      }),
+                  ],
                 ),
               ),
             ),
-            const Spacer(),
-            Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    height: 50,
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 6.0,
-                      horizontal: 12.0,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[200],
-                      borderRadius: const BorderRadius.all(
-                        Radius.circular(50.0),
+            Padding(
+              padding: const EdgeInsets.all(5.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      // height: 50,
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 6.0,
+                        horizontal: 12.0,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        borderRadius: const BorderRadius.all(
+                          Radius.circular(50.0),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          const Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Icon(
+                              Icons.image,
+                              color: Colors.black,
+                            ),
+                          ),
+                          Expanded(
+                            child: TextFormField(
+                              controller: _controller?.chat,
+                              initialValue: null,
+                              decoration: InputDecoration.collapsed(
+                                filled: true,
+                                fillColor: Colors.transparent,
+                                hintText: "kirim pesan . . .",
+                                hintStyle: TextStyle(
+                                  color: Colors.grey[500],
+                                ),
+                                hoverColor: Colors.transparent,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    child: Row(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Icon(
-                            Icons.image,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                        Expanded(
-                          child: TextFormField(
-                            initialValue: null,
-                            decoration: InputDecoration.collapsed(
-                              filled: true,
-                              fillColor: Colors.transparent,
-                              hintText: "enter questions...",
-                              hintStyle: TextStyle(
-                                color: Colors.grey[500],
-                              ),
-                              hoverColor: Colors.transparent,
-                            ),
-                            onFieldSubmitted: (value) {},
-                          ),
-                        ),
-                      ],
+                  ),
+                  IconButton(
+                    onPressed: () async {
+                      _controller?.addMsg();
+                      await _controller?.getAnswer();
+                      setState(() {});
+                      for (var data in _controller!.chatList) {
+                        print(data.message);
+                      }
+                    },
+                    icon: const Icon(
+                      Icons.send,
+                      color: Colors.black,
+                      size: 30.0,
                     ),
                   ),
-                ),
-                IconButton(
-                  onPressed: () {},
-                  icon: const Icon(
-                    Icons.send,
-                    color: Colors.blue,
-                    size: 30.0,
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ],
         ),
