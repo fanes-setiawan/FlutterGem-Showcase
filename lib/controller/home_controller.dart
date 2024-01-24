@@ -1,75 +1,122 @@
-import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gemini/flutter_gemini.dart' as g;
+import 'package:flutter_gemini/flutter_gemini.dart';
 import 'package:fluttergem_showcase/utils/model/chat_model.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
 class HomeController {
   void Function(void Function()) setState;
   HomeController({required this.setState});
-  TextEditingController chat = TextEditingController();
+  TextEditingController text = TextEditingController();
+
+  // final gemini = g.Gemini.instance;
   bool isLoading = false;
-  List<ChatModel> chatList = [];
+  // XFile? selectedImage;
+  final ImagePicker picker = ImagePicker();
+  String? searchedText, result;
 
-  addMsg() {
-    if (chat.text.isNotEmpty) {
-      DateTime now = DateTime.now();
+  Uint8List? selectedImage;
 
-      String formattedTime24 = DateFormat('HH:mm').format(now);
-      ChatModel newChat = ChatModel(
-        time: formattedTime24.toString(),
-        message: chat.text,
-        isSender: true,
-        id: 1,
+  final gemini = Gemini.instance;
+  bool _loading = false;
+
+  bool get loading => _loading;
+
+  set loading(bool set) => setState(() => _loading = set);
+  final List<Content> chats = [];
+  final List<ChatModel> chatList = [];
+
+  void sendMsg() {
+    DateTime now = DateTime.now();
+    String formattedTime24 = DateFormat('HH:mm').format(now);
+    if (text.text.isNotEmpty && selectedImage == null) {
+      final searchedText = text.text;
+      Content userChat = Content(
+        role: 'user',
+        parts: [
+          Parts(
+            text: searchedText,
+          )
+        ],
       );
-      setState(() {
-        chatList.add(newChat);
+      chats.add(userChat);
+      ChatModel newChat = ChatModel(
+        id: 1,
+        time: formattedTime24.toString(),
+        message: userChat.parts?.firstOrNull?.text ?? 'cannot generate data!',
+        isSender: true,
+      );
+      chatList.add(newChat);
+      text.clear();
+      loading = true;
+
+      gemini.chat(chats).then((value) {
+        Content participantChat = Content(
+          role: 'model',
+          parts: [
+            Parts(
+              text: value?.output,
+            ),
+          ],
+        );
+        chats.add(participantChat);
+        ChatModel newChats = ChatModel(
+          id: 2,
+          time: formattedTime24.toString(),
+          message: participantChat.parts?.firstOrNull?.text ??
+              'cannot generate data!',
+          isSender: false,
+        );
+        chatList.add(newChats);
+        loading = false;
       });
-      chat.clear();
+    } else if (text.text.isNotEmpty && selectedImage != null) {
+      searchedText = text.text;
+      ChatModel newChat = ChatModel(
+        id: 1,
+        images: selectedImage,
+        time: formattedTime24.toString(),
+        message: searchedText!,
+        isSender: true,
+      );
+
+      chatList.add(newChat);
+      text.clear();
+      loading = true;
+
+      gemini.textAndImage(text: searchedText!, images: [selectedImage!]).then(
+        (value) {
+          result = value?.content?.parts?.last.text;
+          loading = false;
+
+          ChatModel newChats = ChatModel(
+            id: 3,
+            time: formattedTime24.toString(),
+            message: result ?? 'cannot generate data!',
+            isSender: false,
+          );
+
+          setState(() {
+            chatList.add(newChats);
+          });
+        },
+      );
     }
   }
 
-  getAnswer() async {
-    DateTime now = DateTime.now();
+  Future<void> pickImage() async {
+    final XFile? photo = await picker.pickImage(source: ImageSource.gallery);
 
-    String formattedTime24 = DateFormat('HH:mm').format(now);
-    const String key = "_YOUR KEY_";
-    const String url =
-        "https://generativelanguage.googleapis.com/v1beta/models/chat-bison-001:generateMessage?key=${key}";
-
-    List<Map<String, String>> msg = [];
-    for (var i in chatList) {
-      msg.add({"content": i.message});
+    if (photo != null) {
+      photo.readAsBytes().then(
+            (value) => setState(
+              () {
+                selectedImage = Uint8List.fromList(value);
+              },
+            ),
+          );
     }
-    print(msg);
-    Map<String, dynamic> request = {
-      "prompt": {"messages": msg},
-      "temperature": 1,
-      "candidateCount": 1,
-      "topP": 1,
-      "topK": 1
-    };
-    setState(() {
-      isLoading = true;
-    });
-    var response = await Dio().post(
-      url,
-      data: request,
-    );
-
-    setState(() {
-      isLoading = false;
-      ChatModel newChat = ChatModel(
-        time: formattedTime24.toString(),
-        message: response.data != null && response.data['candidates'] != null
-            ? response.data['candidates'][0]['content'] ??
-                'Saya bingung atas pertanyaan Anda'
-            : 'maaf, saya tidak mengerti masud kamu',
-        isSender: false,
-        id: 2,
-      );
-      setState(() {
-        chatList.add(newChat);
-      });
-    });
   }
 }

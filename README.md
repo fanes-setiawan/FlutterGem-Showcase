@@ -1,16 +1,64 @@
-# fluttergem_showcase
+# FlutterGem Showcase
 
-A new Flutter project.
+Welcome to the FlutterGem Showcase project! This Flutter project is designed to showcase various features and capabilities using different Flutter packages.
+
+## Project Overview
+
+This project includes the following key features:
+
+- Real-time chat functionality with `flutter_chat_bubble`.
+- Localization support using `intl`.
+- HTTP requests with `http` and `dio` packages.
+- JSON serialization with `json_annotation` and `json_serializable`.
+- Markdown rendering with `flutter_markdown`.
+- Image picking with `image_picker`.
+- Smooth scrolling and navigation with `flutter_gemini`.
+- Animation integration with `lottie`.
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+### Prerequisites
 
-A few resources to get you started if this is your first Flutter project:
+- Flutter SDK installed (version >=3.1.3 <4.0.0)
+- Dart SDK
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+### Installation
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/your_username/fluttergem_showcase.git
+   ```
+2. Navigate to the project directory:
+   ```bash
+   cd fluttergem_showcase
+   ```
+3. Install dependencies:
+   ```bash
+   flutter pub get
+   ```
+
+### Running the App
+
+Run the application on an emulator or connected device:
+`bash
+    flutter run
+    `
+
+### Dependencies
+
+- `cupertino_icons`
+- `flutter_chat_bubble`
+- `intl`
+- `http`
+- `dio`
+- `freezed_annotation`
+- `json_annotation`
+- `flutter_markdown`
+- `image_picker`
+- `flutter_gemini`
+- `lottie`
+
+### Demo
+
+![Demo](assets/video/demo.mp4)
+Check out the [demo on YouTube](https://youtube.com/shorts/cqIs9VU0zFs?si=U3le_Sft1dVorocE).
