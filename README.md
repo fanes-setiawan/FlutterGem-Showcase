@@ -26,7 +26,7 @@ This project includes the following key features:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your_username/fluttergem_showcase.git
+   git clone https://github.com/fanes-setiawan/FlutterGem-Showcase.git
    ```
 2. Navigate to the project directory:
    ```bash
