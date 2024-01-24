@@ -60,5 +60,5 @@ Run the application on an emulator or connected device:
 
 ### Demo
 
-![Demo](assets/video/demo.mp4)
+![Demo](assets/video/demo.gif)
 Check out the [demo on YouTube](https://youtube.com/shorts/cqIs9VU0zFs?si=U3le_Sft1dVorocE).
